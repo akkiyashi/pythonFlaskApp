@@ -1,0 +1,56 @@
+Parameters:
+  ContainerPort:
+    Type: Number
+    Default: 8080
+  HostPort:
+    Type: Number
+    Default: 8080
+Resources:
+  ECSCluster:
+    Type: 'AWS::ECS::Cluster'
+    Properties:
+      ClusterName: PythonFlaskCluster
+      CapacityProviders:
+        - FARGATE
+      DefaultCapacityProviderStrategy:
+        - CapacityProvider: FARGATE
+          Weight: 1
+
+  FlaskTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: "Flask-TaskDef"
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      Cpu: 256
+      Memory: 0.5GB
+      ExecutionRoleArn: 'iamrolearnwith access to pull image from ecr repository'
+      TaskRoleArn: 'iamrolearn required to run the task'
+      ContainerDefinitions:
+        -
+          Name: "FlaskApp"
+          Image: "account_id.dkr.ecr.eu-west-1.amazonaws.com/flaskapp:latest"
+          Cpu: 256
+          PortMappings:
+            -
+              ContainerPort: !Ref ContainerPort
+              HostPort: !Ref HostPort
+          Memory: 512
+          Essential: true
+
+  ECSService:
+    Type: AWS::ECS::Service
+    Properties:
+      Cluster:
+        Ref: "ECSCluster"
+      DesiredCount: 1
+      TaskDefinition: !Ref FlaskTaskDefinition
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          Subnets:
+            - 'subnet-id1'
+            - 'subnet-id2'
+          SecurityGroups:
+            - 'sg-id which allows traffic on port 8080'
