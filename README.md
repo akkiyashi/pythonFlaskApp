@@ -1,4 +1,7 @@
 # pythonFlaskApp
+Need to create the ECR image manually and push it to the ECR repository.
+Further once the image is pushed we need to add the image uri to the cloudformation template in the following code snippet
+
 The ECR image was created using the following commands:
 1. Login to ECR ---> aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin account_id.dkr.ecr.eu-west-1.amazonaws.com
 2. Build the docker image --> docker build -t flaskapp .
